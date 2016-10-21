@@ -1,29 +1,13 @@
-import json
-import pprint
-from Parser import Parser
+""" TODO docstring """
 
-input = """
-{
-    "glossary": {
-        "title": "example glossary",
-        "GlossDiv": {
-            "title": "S",
-            "GlossList": {
-                "GlossEntry": {
-                    "ID": "SGML",
-                    "SortAs": "SGML",
-                    "GlossTerm": "Standard Generalized Markup Language",
-                    "Acronym": "SGML",
-                    "Abbrev": "ISO 8879:1986",
-                    "GlossDef": {
-                        "para": "A meta-markup language, used to create markup languages such as DocBook."
-                    },
-                    "GlossSee": "markup"
-                }
-            }
-        }
-    }
-}
-"""
+from test import Test
 
-print(Parser.get_classes(input))
+def main():
+    """ TODO docstring """
+
+    #print(Parser.get_classes(input_json_string))
+
+    Test().run_tests()
+
+if __name__ == "__main__":
+    main()

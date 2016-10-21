@@ -1,53 +1,73 @@
+""" TODO docstring """
+
 import json
 import collections
-from queue import *
+from queue import Queue
+from dateutil.parser import parse
 
 #pp = pprint.PrettyPrinter(indent=4)
 
+
 class Parser:
-    def get_classes(jsonString):
-        classesToProperties = Parser.parse(jsonString)
+    """ TODO docstring """
+
+    def get_classes(json_string):
+        """ TODO docstring """
+
+        classes_to_properties = Parser.parse(json_string)
 
         result = ''
-        for className, classProperties in classesToProperties.items():
-            result += 'public class %s\r\n' % className
-            result += '{\r\n'
-            for classProperty in classProperties:
-                result += "\tpublic %s %s { get; set; }\r\n" % classProperty
-            result += '}\r\n'
+        for class_name, class_properties in classes_to_properties.items():
+            result += 'public class %s\n' % class_name
+            result += '{\n'
+            for class_property in class_properties:
+                if not class_property['isArray']:
+                    to_replace_tuple = (class_property['typeName'], class_property['propertyName'])
+                else:
+                    to_replace_tuple = (class_property['typeName'] + '[]', class_property['propertyName'])
+                result += "\tpublic %s %s { get; set; }\n" % to_replace_tuple
+            result += '}\n\n'
 
         return result
 
-    def parse(jsonString):
+    def parse(json_string):
+        """ TODO docstring """
+
         try:
-            input = json.loads(jsonString, object_pairs_hook=collections.OrderedDict)
-        except json.JSONDecodeError as e:
+            json_dictionary = json.loads(json_string, object_pairs_hook=collections.OrderedDict)
+        except json.JSONDecodeError as json_decode_error:
             error_message = ""
             error_message += "Paste JSON As Classes\r\n"
-            error_message += "The content in the clipboard isn't a valid JSON instance. Please fix the issue and try again:\r\n"
-            error_message += e.args[0]
+            error_message += "The content in the clipboard isn't a valid JSON instance. "
+            error_message += "Please fix the issue and try again:\r\n"
+            error_message += json_decode_error.args[0]
             print(error_message)
             raise ValueError(error_message)
 
         classes = Queue()
-        classes.put(input)
+        classes.put(json_dictionary)
 
-        classesToProperties = collections.OrderedDict()
-        currentClassName = 'Rootobject'
+        classes_to_properties = collections.OrderedDict()
+        current_class_name = 'Rootobject'
 
-        while (not classes.empty()):
-            currentClass = classes.get()
+        while not classes.empty():
+            current_class = classes.get()
             properties = []
-            nextClassName = ''
-            for key, value in currentClass.items():
-                if (type(value) is collections.OrderedDict):
-                    properties.append((key, key))
+            next_class_name = ''
+            for key, value in current_class.items():
+                if isinstance(value, collections.OrderedDict):
+                    properties.append({'typeName': key, 'propertyName': key, 'isArray': False})
                     classes.put(value)
-                    nextClassName = key
+                    next_class_name = key
+                elif isinstance(value, list):
+                    if isinstance(value[0], collections.OrderedDict):
+                        x = '1'
+                    else:
+                        properties.append({'typeName': type(value[0]).__name__, 'propertyName': key, 'isArray': True})
                 else:
-                    properties.append((type(value).__name__, key))
-            classesToProperties[currentClassName] = properties
-            currentClassName = nextClassName
+                    test = parse(value)
+                    properties.append({'typeName': type(value).__name__, 'propertyName': key, 'isArray': False})
+            classes_to_properties[current_class_name] = properties
+            current_class_name = next_class_name
 
-        return classesToProperties
-
+        return classes_to_properties
