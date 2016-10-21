@@ -18,10 +18,11 @@ class Test(unittest.TestCase):
         #self.int_type()
         #self.float_type()
         #self.bool_type()
+        #self.null_type()
         #self.datetime_type()
         #self.string_array_type()
         #self.custom_type()
-        self.datetime_type()
+        self.custom_array_type()
 
     def compare(self, input_json_string, expected_output):
         """ TODO docstring """
@@ -103,7 +104,7 @@ class Test(unittest.TestCase):
         input_json_string = """{ "createdDate": "2012-05-03T00:06:00.638Z" }"""
         expected_output = """public class Rootobject
 {
-	public NoneType name { get; set; }
+	public datetime createdDate { get; set; }
 }"""
         self.compare(input_json_string, expected_output)
 
