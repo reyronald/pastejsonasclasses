@@ -1,4 +1,9 @@
-""" TODO docstring """
+""" 
+TODO docstring 
+http://www.michael-whelan.net/paste-json-as-classes/
+
+https://blogs.msdn.microsoft.com/webdev/2012/12/18/paste-json-as-classes-in-asp-net-and-web-tools-2012-2-rc/
+"""
 
 import unittest
 from Parser import Parser
