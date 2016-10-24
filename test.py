@@ -14,14 +14,17 @@ class Test(unittest.TestCase):
     def run_tests(self):
         """ TODO docstring """
 
-        #self.string_type()
-        #self.int_type()
-        #self.float_type()
-        #self.bool_type()
-        #self.null_type()
-        #self.datetime_type()
-        #self.string_array_type()
-        #self.custom_type()
+        self.string_type()
+        self.int_type()
+        self.float_type()
+        self.bool_type()
+        self.null_type()
+        self.null_array_type()
+        self.datetime_type()
+        self.datetime_array_type_nullable_1()
+        self.datetime_array_type_nullable_2()
+        self.string_array_type()
+        self.custom_type()
         self.custom_array_type()
 
     def compare(self, input_json_string, expected_output):
@@ -92,6 +95,19 @@ class Test(unittest.TestCase):
         expected_output = """public class Rootobject
 {
 	public NoneType name { get; set; }
+}"""
+        self.compare(input_json_string, expected_output)
+    
+    """
+    Null/NoneType[] (object) type
+    """
+    def null_array_type(self):
+        """ Null/NoneType[] (object) type """
+
+        input_json_string = """{ "noneType": [ null, null ] }"""
+        expected_output = """public class Rootobject
+{
+	public NoneType[] noneType { get; set; }
 }"""
         self.compare(input_json_string, expected_output)
 
@@ -207,6 +223,35 @@ public class person
 	public str name { get; set; }
 }"""
         self.compare(input_json_string, expected_output)
+
+    """
+    DateTime?[] type 1
+    """
+    def datetime_array_type_nullable_1(self):
+        """ DateTime?[] type """
+        input_json_string = """{
+    "nullableDateTimes": ["2012-05-03T00:06:00.638Z", null]
+}"""
+        expected_output = """public class Rootobject
+{
+	public datetime?[] nullableDateTimes { get; set; }
+}"""
+        self.compare(input_json_string, expected_output)
+
+    """
+    DateTime?[] type 2
+    """
+    def datetime_array_type_nullable_2(self):
+        """ DateTime?[] type """
+        input_json_string = """{
+    "nullableDateTimes": [null,"2012-05-03T00:06:00.638Z"]
+}"""
+        expected_output = """public class Rootobject
+{
+	public datetime?[] nullableDateTimes { get; set; }
+}"""
+        self.compare(input_json_string, expected_output)
+
 
 if __name__ == '__main__':
     unittest.main()

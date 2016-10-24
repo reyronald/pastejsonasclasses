@@ -33,10 +33,11 @@ class Parser:
             result += 'public class %s\n' % class_name
             result += '{\n'
             for class_property in class_properties:
+                type_name = class_property.type_name + '?' if class_property.is_nullable else class_property.type_name
                 if not class_property.is_array:
-                    to_replace_tuple = (class_property.type_name, class_property.property_name)
+                    to_replace_tuple = (type_name, class_property.property_name)
                 else:
-                    to_replace_tuple = (class_property.type_name + '[]', class_property.property_name)
+                    to_replace_tuple = (type_name + '[]', class_property.property_name)
                 result += "\tpublic %s %s { get; set; }\n" % to_replace_tuple
             result += '}\n\n'
 
@@ -74,23 +75,29 @@ class Parser:
 
                     # The array is an array of primitives
                     else:
-                        properties.append(ClassProperty(type(value[0]).__name__, key, True, False))
+                        first_non_null = next((x for x in value if x is not None), None)
+                        is_nullable = any(element is None for element in value) if first_non_null is not None else False
+                        properties.append(Parser.get_primitive_class_property(first_non_null, key, True, is_nullable))
 
                 # Value is a primitive
                 else:
-                    if not isinstance(value, str):
-                        properties.append(ClassProperty(type(value).__name__, key, False, False))
-                    else:   
-                        try:
-                            date = parse(value)
-                            properties.append(ClassProperty(type(date).__name__, key, False, False))
-                        except ValueError as e:
-                            properties.append(ClassProperty(type(value).__name__, key, False, False))
+                    properties.append(Parser.get_primitive_class_property(value, key, False, False))
 
             classes_to_properties[current_class_name] = properties
             current_class_name = next_class_name
 
         return classes_to_properties
+
+    def get_primitive_class_property(value, key, is_array, is_nullable):
+        if not isinstance(value, str):
+            class_property = ClassProperty(type(value).__name__, key, is_array, is_nullable)
+        else:   
+            try:
+                date = parse(value)
+                class_property = ClassProperty(type(date).__name__, key, is_array, is_nullable)
+            except ValueError as e:
+                class_property = ClassProperty(type(value).__name__, key, is_array, is_nullable)
+        return class_property
 
     def plural_to_singular(word):
         """ Receives a plural word and returns its singular representation """
