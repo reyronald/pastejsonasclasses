@@ -14,18 +14,22 @@ class Test(unittest.TestCase):
     def run_tests(self):
         """ TODO docstring """
 
-        self.string_type()
-        self.int_type()
-        self.float_type()
-        self.bool_type()
-        self.null_type()
-        self.null_array_type()
-        self.datetime_type()
-        self.datetime_array_type_nullable_1()
-        self.datetime_array_type_nullable_2()
-        self.string_array_type()
-        self.custom_type()
-        self.custom_array_type()
+        #self.string_type()
+        #self.int_type()
+        #self.float_type()
+        #self.bool_type()
+        #self.null_type()
+        #self.null_array_type()
+        #self.datetime_type()
+        #self.datetime_array_type_nullable_1()
+        #self.datetime_array_type_nullable_2()
+        #self.string_array_type()
+        #self.custom_type()
+        #self.custom_array_type()
+        #self.custom_nullable_array_type_1()
+        #self.custom_nullable_array_type_2()
+        self.custom_array_type_with_nullable_primitive_1()
+        self.custom_array_type_with_nullable_primitive_2()
 
     def compare(self, input_json_string, expected_output):
         """ TODO docstring """
@@ -225,6 +229,42 @@ public class person
         self.compare(input_json_string, expected_output)
 
     """
+    Custom?[] type 1
+    """
+    def custom_nullable_array_type_1(self):
+        """ Custom?[] type 1 """
+
+        input_json_string = """{ "people": [ {"name": "Ronald"}, null ] }"""
+        expected_output = """public class Rootobject
+{
+	public person[] people { get; set; }
+}
+
+public class person
+{
+	public str name { get; set; }
+}"""
+        self.compare(input_json_string, expected_output)
+
+    """
+    Custom?[] type 2
+    """
+    def custom_nullable_array_type_2(self):
+        """ Custom?[] type 2 """
+
+        input_json_string = """{ "people": [ null, {"name": "Ronald"} ] }"""
+        expected_output = """public class Rootobject
+{
+	public person[] people { get; set; }
+}
+
+public class person
+{
+	public str name { get; set; }
+}"""
+        self.compare(input_json_string, expected_output)
+
+    """
     DateTime?[] type 1
     """
     def datetime_array_type_nullable_1(self):
@@ -251,6 +291,63 @@ public class person
 	public datetime?[] nullableDateTimes { get; set; }
 }"""
         self.compare(input_json_string, expected_output)
+
+    """
+    Custom[] with nullable primitive type 1
+    """
+    def custom_array_type_with_nullable_primitive_1(self):
+        """ Custom[] with nullable primitive type 1 """
+
+        input_json_string = """{
+  "elements": [
+    {
+      "nullableDateTime": null
+    },
+    {
+      "nullableDateTime": "2012-05-03T00:06:00.638Z"
+    }
+  ]
+}"""
+        expected_output = """public class Rootobject
+{
+	public elements[] element { get; set; }
+}
+
+public class element
+{
+	public datetime? nullableDateTime { get; set; }
+}"""
+        self.compare(input_json_string, expected_output)
+
+    """
+    Custom[] with nullable primitive type 2
+    """
+    def custom_array_type_with_nullable_primitive_2(self):
+        """ Custom[] with nullable primitive type 2 """
+
+        input_json_string = """{
+  "elements": [
+    {
+      "nullableDateTime": "2012-05-03T00:06:00.638Z"
+    },
+    {
+      "nullableDateTime": null
+    }
+  ]
+}"""
+        expected_output = """public class Rootobject
+{
+	public elements[] element { get; set; }
+}
+
+public class element
+{
+	public datetime? nullableDateTime { get; set; }
+}"""
+        self.compare(input_json_string, expected_output)
+
+
+
 
 
 if __name__ == '__main__':

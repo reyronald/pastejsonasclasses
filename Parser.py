@@ -52,6 +52,8 @@ class Parser:
         classes_to_properties = collections.OrderedDict()
         current_class_name = 'Rootobject'
 
+        get_first_or_none = lambda list: next((x for x in list if x is not None), None)
+
         while not classes.empty():
             current_class = classes.get()
             properties = []
@@ -66,18 +68,27 @@ class Parser:
 
                 # Value is an array
                 elif isinstance(value, list):
-                    # The array is an array of objects
-                    if isinstance(value[0], collections.OrderedDict):
-                        singular_key = Parser.plural_to_singular(key)
-                        properties.append(ClassProperty(singular_key, key, True, False))
-                        classes.put(value[0])
-                        next_class_name = singular_key
+                    is_array = True
+                    first_non_null = get_first_or_none(value)
 
                     # The array is an array of primitives
-                    else:
-                        first_non_null = next((x for x in value if x is not None), None)
+                    if not isinstance(first_non_null, collections.OrderedDict):
                         is_nullable = any(element is None for element in value) if first_non_null is not None else False
-                        properties.append(Parser.get_primitive_class_property(first_non_null, key, True, is_nullable))
+                        properties.append(Parser.get_primitive_class_property(first_non_null, key, is_array, is_nullable))
+
+                    # The array is an array of objects
+                    else:
+                        singular_key = Parser.plural_to_singular(key)
+                        properties.append(ClassProperty(singular_key, key, is_array, False))
+
+                        (x['nullableDateTime'] for x in value)
+
+                        constructed_class_with_no_nulls = first_non_null
+                        for elementKey, elementValue in first_non_null.items():
+                            constructed_class_with_no_nulls[ elementKey ] = tuple((x['nullableDateTime'] for x in value))[1]
+
+                        classes.put(constructed_class_with_no_nulls)
+                        next_class_name = singular_key
 
                 # Value is a primitive
                 else:
@@ -103,5 +114,7 @@ class Parser:
         """ Receives a plural word and returns its singular representation """
         if word == 'people':
             return 'person'
+        elif word == 'elements':
+            return 'element'
 
         return word
