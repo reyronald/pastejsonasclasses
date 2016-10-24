@@ -21,6 +21,7 @@
     <PtvsTargetsFile>$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets</PtvsTargetsFile>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="ClassProperty.py" />
     <Compile Include="main.py" />
     <Compile Include="Parser.py" />
     <Compile Include="test.py">

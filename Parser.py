@@ -4,6 +4,7 @@ import json
 import collections
 from queue import Queue
 from dateutil.parser import parse
+from ClassProperty import ClassProperty
 
 #pp = pprint.PrettyPrinter(indent=4)
 
@@ -32,10 +33,10 @@ class Parser:
             result += 'public class %s\n' % class_name
             result += '{\n'
             for class_property in class_properties:
-                if not class_property['isArray']:
-                    to_replace_tuple = (class_property['typeName'], class_property['propertyName'])
+                if not class_property.is_array:
+                    to_replace_tuple = (class_property.type_name, class_property.property_name)
                 else:
-                    to_replace_tuple = (class_property['typeName'] + '[]', class_property['propertyName'])
+                    to_replace_tuple = (class_property.type_name + '[]', class_property.property_name)
                 result += "\tpublic %s %s { get; set; }\n" % to_replace_tuple
             result += '}\n\n'
 
@@ -55,27 +56,36 @@ class Parser:
             properties = []
             next_class_name = ''
             for key, value in current_class.items():
+
+                # Value is an object
                 if isinstance(value, collections.OrderedDict):
-                    properties.append({'typeName': key, 'propertyName': key, 'isArray': False})
+                    properties.append(ClassProperty(key, key, False, False))
                     classes.put(value)
                     next_class_name = key
+
+                # Value is an array
                 elif isinstance(value, list):
+                    # The array is an array of objects
                     if isinstance(value[0], collections.OrderedDict):
                         singular_key = Parser.plural_to_singular(key)
-                        properties.append({'typeName': singular_key, 'propertyName': key, 'isArray': True})
+                        properties.append(ClassProperty(singular_key, key, True, False))
                         classes.put(value[0])
                         next_class_name = singular_key
+
+                    # The array is an array of primitives
                     else:
-                        properties.append({'typeName': type(value[0]).__name__, 'propertyName': key, 'isArray': True})
+                        properties.append(ClassProperty(type(value[0]).__name__, key, True, False))
+
+                # Value is a primitive
                 else:
                     if not isinstance(value, str):
-                        properties.append({'typeName': type(value).__name__, 'propertyName': key, 'isArray': False})
+                        properties.append(ClassProperty(type(value).__name__, key, False, False))
                     else:   
                         try:
                             date = parse(value)
-                            properties.append({'typeName': type(date).__name__, 'propertyName': key, 'isArray': False})
+                            properties.append(ClassProperty(type(date).__name__, key, False, False))
                         except ValueError as e:
-                            properties.append({'typeName': type(value).__name__, 'propertyName': key, 'isArray': False})
+                            properties.append(ClassProperty(type(value).__name__, key, False, False))
 
             classes_to_properties[current_class_name] = properties
             current_class_name = next_class_name
