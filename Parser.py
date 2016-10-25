@@ -58,41 +58,50 @@ class Parser:
             current_class = classes.get()
             properties = []
             next_class_name = ''
-            for key, value in current_class.items():
 
-                # Value is an object
-                if isinstance(value, collections.OrderedDict):
-                    properties.append(ClassProperty(key, key, False, False))
-                    classes.put(value)
-                    next_class_name = key
+            if isinstance(current_class, list):
+                first_non_null = get_first_or_none(current_class)
+                constructed_class_with_no_nulls = first_non_null
+                is_property_nullable = {}
+                current_class_without_nulls = [x for x in current_class if x is not None]
+                for element_key, element_value in first_non_null.items():
+                    plucked_element_values = list((x[element_key] for x in current_class_without_nulls))
+                    constructed_class_with_no_nulls[element_key] = get_first_or_none(plucked_element_values)
+                    is_property_nullable[ element_key ] = any(element is None for element in plucked_element_values)
+                                 
+                array_elements_class_properties = Parser.parse(constructed_class_with_no_nulls)['Rootobject']
+                for y in array_elements_class_properties:
+                    properties.append(ClassProperty(y.type_name, y.property_name, y.is_array, is_property_nullable[ y.property_name]))
+                current_class_name = singular_key
+            else:
+                for key, value in current_class.items():
 
-                # Value is an array
-                elif isinstance(value, list):
-                    is_array = True
-                    first_non_null = get_first_or_none(value)
+                    # Value is an object
+                    if isinstance(value, collections.OrderedDict):
+                        properties.append(ClassProperty(key, key, False, False))
+                        classes.put(value)
+                        next_class_name = key
 
-                    # The array is an array of primitives
-                    if not isinstance(first_non_null, collections.OrderedDict):
-                        is_nullable = any(element is None for element in value) if first_non_null is not None else False
-                        properties.append(Parser.get_primitive_class_property(first_non_null, key, is_array, is_nullable))
+                    # Value is an array
+                    elif isinstance(value, list):
+                        is_array = True
+                        first_non_null = get_first_or_none(value)
 
-                    # The array is an array of objects
+                        # The array is an array of primitives
+                        if not isinstance(first_non_null, collections.OrderedDict):
+                            is_nullable = any(element is None for element in value) if first_non_null is not None else False
+                            properties.append(Parser.get_primitive_class_property(first_non_null, key, is_array, is_nullable))
+
+                        # The array is an array of objects
+                        else:
+                            singular_key = Parser.plural_to_singular(key)
+                            properties.append(ClassProperty(singular_key, key, is_array, False))
+                            classes.put(value)
+                            next_class_name = singular_key
+
+                    # Value is a primitive
                     else:
-                        singular_key = Parser.plural_to_singular(key)
-                        properties.append(ClassProperty(singular_key, key, is_array, False))
-
-                        (x['nullableDateTime'] for x in value)
-
-                        constructed_class_with_no_nulls = first_non_null
-                        for elementKey, elementValue in first_non_null.items():
-                            constructed_class_with_no_nulls[ elementKey ] = tuple((x['nullableDateTime'] for x in value))[1]
-
-                        classes.put(constructed_class_with_no_nulls)
-                        next_class_name = singular_key
-
-                # Value is a primitive
-                else:
-                    properties.append(Parser.get_primitive_class_property(value, key, False, False))
+                        properties.append(Parser.get_primitive_class_property(value, key, False, False))
 
             classes_to_properties[current_class_name] = properties
             current_class_name = next_class_name

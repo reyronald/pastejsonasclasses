@@ -14,20 +14,20 @@ class Test(unittest.TestCase):
     def run_tests(self):
         """ TODO docstring """
 
-        #self.string_type()
-        #self.int_type()
-        #self.float_type()
-        #self.bool_type()
-        #self.null_type()
-        #self.null_array_type()
-        #self.datetime_type()
-        #self.datetime_array_type_nullable_1()
-        #self.datetime_array_type_nullable_2()
-        #self.string_array_type()
-        #self.custom_type()
-        #self.custom_array_type()
-        #self.custom_nullable_array_type_1()
-        #self.custom_nullable_array_type_2()
+        self.string_type()
+        self.int_type()
+        self.float_type()
+        self.bool_type()
+        self.null_type()
+        self.null_array_type()
+        self.datetime_type()
+        self.datetime_array_type_nullable_1()
+        self.datetime_array_type_nullable_2()
+        self.string_array_type()
+        self.custom_type()
+        self.custom_array_type()
+        self.custom_nullable_array_type_1()
+        self.custom_nullable_array_type_2()
         self.custom_array_type_with_nullable_primitive_1()
         self.custom_array_type_with_nullable_primitive_2()
 
@@ -310,7 +310,7 @@ public class person
 }"""
         expected_output = """public class Rootobject
 {
-	public elements[] element { get; set; }
+	public element[] elements { get; set; }
 }
 
 public class element
@@ -337,7 +337,7 @@ public class element
 }"""
         expected_output = """public class Rootobject
 {
-	public elements[] element { get; set; }
+	public element[] elements { get; set; }
 }
 
 public class element
